@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, type JSX } from "react";
 import { motion, useInView, useAnimation } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
@@ -257,6 +257,6 @@ function BoxIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
       <path d="M21 16V8a2 2 0 00-1-1.73L13 2 4 6.27A2 2 0 003 8v8a2 2 0 001 1.73L11 22l9-4.27A2 2 0 0021 16z" strokeWidth="1.2" />
-    </svg>
+    </svg> 
   );
 }
