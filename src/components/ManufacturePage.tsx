@@ -382,14 +382,12 @@ const ManufacturePage = () => {
         </motion.div>
       )}
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @keyframes metallicShine {
-            0% { background-position: 0% center; }
-            100% { background-position: 300% center; }
-          }
-        `
-      }} />
+      <style >{`
+        @keyframes metallicShine {
+          0% { background-position: 0% center; }
+          100% { background-position: 300% center; }
+        }
+      `}</style>
     </div>
   );
 };
