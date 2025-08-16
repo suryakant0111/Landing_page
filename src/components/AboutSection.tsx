@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, useInView, useAnimation } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 
 // Ready-to-paste AboutSection component (TailwindCSS required)
 // Drop this file into your project (e.g. src/components/AboutSectionReadyToPaste.tsx)
@@ -12,10 +13,35 @@ const images = [
   "https://www.customproc.com/wp-content/uploads/2023/05/cnc_machined_parts_3328458.png",
 ];
 
+interface Item {
+  number: string;
+  name: string;
+  icon: JSX.Element;
+}
+
+const items: Item[] = [
+  { number: "01", name: "Custom Brackets", icon: ArrowCircle() },
+  { number: "02", name: "Steel Adapters", icon: LinkIcon() },
+  { number: "03", name: "Motor Mounts", icon: BoltIcon() },
+  { number: "04", name: "Enclosures", icon: BoxIcon() },
+];
+
+const fadeInUp: Variants = {
+  hidden: { y: 40, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.4, 0, 0.2, 1]
+    }
+  }
+};
+
 export default function AboutSection() {
   const [currentImage, setCurrentImage] = useState(0);
   const controls = useAnimation();
-  const ref = React.useRef(null);
+  const ref = React.useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
@@ -26,47 +52,27 @@ export default function AboutSection() {
     return () => clearInterval(id);
   }, [controls, isInView]);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
         staggerChildren: 0.2,
-        delayChildren: 0.3,
       },
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
         duration: 0.6,
-        ease: 'easeOut',
-      },
-    },
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
   };
-
-  const fadeInUp = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.4, 0.0, 0.2, 1],
-      },
-    },
-  };
-
-  const items = [
-    { number: "01", name: "Custom Brackets", icon: ArrowCircle() },
-    { number: "02", name: "Steel Adapters", icon: LinkIcon() },
-    { number: "03", name: "Motor Mounts", icon: BoltIcon() },
-    { number: "04", name: "Enclosures", icon: BoxIcon() },
-  ];
 
   return (
     <section id="about" className="relative w-full bg-white py-16 overflow-hidden">
@@ -220,7 +226,7 @@ export default function AboutSection() {
 
 /* ---------- small inline SVG icons ---------- */
 
-function ArrowCircle() {
+function ArrowCircle(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
       <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
@@ -230,7 +236,7 @@ function ArrowCircle() {
   );
 }
 
-function LinkIcon() {
+function LinkIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
       <path d="M10 14a3 3 0 104-4l-1-1" strokeWidth="1.5" />
@@ -239,7 +245,7 @@ function LinkIcon() {
   );
 }
 
-function BoltIcon() {
+function BoltIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
       <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" strokeWidth="1.5" />
@@ -247,7 +253,7 @@ function BoltIcon() {
   );
 }
 
-function BoxIcon() {
+function BoxIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
       <path d="M21 16V8a2 2 0 00-1-1.73L13 2 4 6.27A2 2 0 003 8v8a2 2 0 001 1.73L11 22l9-4.27A2 2 0 0021 16z" strokeWidth="1.2" />

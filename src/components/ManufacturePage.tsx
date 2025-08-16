@@ -1,44 +1,58 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { ArrowRight, Upload, X, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 
-const ManufacturePage = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+interface UploadedFile {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  type: string;
+  status: 'ready' | 'uploading' | 'success' | 'error';
+  error?: string;
+}
+
+const ManufacturePage: React.FC = () => {
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState('idle'); // 'idle', 'uploading', 'success', 'error'
-  const fileInputRef = useRef(null);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const supportedFormats = ['iges', 'stl', 'fbx', 'dxf', 'step', 'stp'];
   const maxFileSize = 50 * 1024 * 1024; // 50MB
 
-  const validateFile = (file) => {
-    const extension = file.name.split('.').pop().toLowerCase();
+  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
     const isValidFormat = supportedFormats.includes(extension);
     const isValidSize = file.size <= maxFileSize;
     
-    return {
-      isValid: isValidFormat && isValidSize,
-      error: !isValidFormat ? 'Unsupported file format' : !isValidSize ? 'File too large (max 50MB)' : null
-    };
+    if (!isValidFormat) {
+      return { isValid: false, error: 'Unsupported file format' };
+    }
+    if (!isValidSize) {
+      return { isValid: false, error: 'File too large (max 50MB)' };
+    }
+    return { isValid: true };
   };
 
-  const handleFiles = (files) => {
+  const handleFiles = (files: FileList) => {
     const fileArray = Array.from(files);
-    const validFiles = [];
-    const errors = [];
+    const validFiles: UploadedFile[] = [];
+    const errors: string[] = [];
 
     fileArray.forEach(file => {
       const validation = validateFile(file);
       if (validation.isValid) {
         validFiles.push({
-          id: Date.now() + Math.random(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           file,
           name: file.name,
           size: file.size,
-          type: file.name.split('.').pop().toUpperCase(),
+          type: file.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
           status: 'ready'
         });
-      } else {
+      } else if (validation.error) {
         errors.push(`${file.name}: ${validation.error}`);
       }
     });
@@ -56,7 +70,7 @@ const ManufacturePage = () => {
     }
   };
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -66,20 +80,23 @@ const ManufacturePage = () => {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
   };
 
-  const handleChange = (e) => {
-    e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
       handleFiles(e.target.files);
+      // Reset the input value to allow selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -87,16 +104,39 @@ const ManufacturePage = () => {
     fileInputRef.current?.click();
   };
 
-  const removeFile = (fileId) => {
+  const removeFile = (fileId: string) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
   };
 
-  const formatFileSize = (bytes) => {
+  const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Animation variants
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
   };
 
   return (
@@ -140,23 +180,12 @@ const ManufacturePage = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.2,
-            },
-          },
-        }}
+        variants={containerVariants}
       >
         {/* Spherical Joint Card */}
         <motion.div
           className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
-          variants={{
-            hidden: { opacity: 0, scale: 0.9, y: 20 },
-            visible: { opacity: 1, scale: 1, y: 0 },
-          }}
+          variants={itemVariants}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <div className="flex justify-between items-start mb-6">
@@ -195,10 +224,7 @@ const ManufacturePage = () => {
         {/* Protective Cap Card */}
         <motion.div
           className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
-          variants={{
-            hidden: { opacity: 0, scale: 0.9, y: 20 },
-            visible: { opacity: 1, scale: 1, y: 0 },
-          }}
+          variants={itemVariants}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <div className="flex justify-between items-start mb-6">
@@ -237,10 +263,7 @@ const ManufacturePage = () => {
         {/* Functional Upload Section */}
         <motion.div
           className="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden"
-          variants={{
-            hidden: { opacity: 0, scale: 0.9, y: 20 },
-            visible: { opacity: 1, scale: 1, y: 0 },
-          }}
+          variants={itemVariants}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <div className="relative z-10">

@@ -5,8 +5,10 @@ import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import * as THREE from "three";
 import { a, useSpring } from "@react-spring/three";
 import { motion, useInView, useAnimation } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { MetallicText } from './MetallicText';
 
+// Environment Component
 function EnvironmentEXR() {
   const { scene, gl } = useThree();
 
@@ -25,32 +27,29 @@ function EnvironmentEXR() {
   return null;
 }
 
+// Motor Model Component
 function MotorModel() {
-  const groupRef = useRef(null);
-  const { scene, animations } = useGLTF("/models/motor.glb");
+  const groupRef = useRef<THREE.Group>(null);
+  const { scene, animations } = useGLTF("/models/motor.glb") as any; // Type assertion for GLTF
   const { actions } = useAnimations(animations, scene);
   const [active, setActive] = useState(false);
 
   // Smoother and slower spring animation
   const { scale, position, opacity } = useSpring({
-    scale: active ? 4.0 : 0.8,  // Start slightly larger for smoother transition
-    position: active ? [0, 0, 0] : [0, -2, 0],  // Less distance to travel
-    opacity: active ? 1 : 0,  // Add fade effect
+    scale: active ? 4.0 : 0.8,
+    position: active ? [0, 0, 0] : [0, -2, 0],
+    opacity: active ? 1 : 0,
     config: { 
       mass: 2, 
-      tension: 120,  // Reduced tension for slower movement
-      friction: 20,  // Increased friction for less bounce
-      precision: 0.0001
-    },
+      tension: 120,
+      friction: 20
+    }
   });
 
   useEffect(() => {
-    // Slightly longer delay before starting the animation
-    const timer = setTimeout(() => setActive(true), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
+    // Set initial state
+    setActive(true);
+    
     // Trigger the animation after a short delay
     if (actions && Object.keys(actions).length > 0) {
       const firstAnim = Object.keys(actions)[0];
@@ -68,37 +67,59 @@ function MotorModel() {
   });
 
   return (
-    <a.group ref={groupRef} scale={scale} position={position}>
+    <a.group ref={groupRef} scale={scale as any} position={position as any}>
       <primitive 
         object={scene} 
-        opacity={opacity}
+        opacity={opacity as any}
       />
     </a.group>
   );
 }
 
+// Main Component
 export default function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false);
   const controls = useAnimation();
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
+  };
+
   const handleUploadClick = () => {
-    console.log('Upload button clicked');
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.stl,.step,.stp,.obj,.3ds,.fbx';
     input.multiple = true;
-    input.onchange = (e) => {
-      console.log('File selected through upload button');
-      handleFileChange(e as unknown as React.ChangeEvent<HTMLInputElement>);
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files.length > 0) {
+        handleFileChange(target.files);
+      }
     };
     input.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File input changed');
-    const files = event.target.files;
+  const handleFileChange = async (files: FileList) => {
     console.log('Selected files:', files);
     
     if (!files || files.length === 0) {
@@ -113,38 +134,28 @@ export default function HeroSection() {
       const validExtensions = ['.stl', '.step', '.stp', '.obj', '.3ds', '.fbx'];
       const validFiles = uploadedFiles.filter(file => {
         const ext = file.name.split('.').pop()?.toLowerCase();
-        return ext && validExtensions.includes(`.${ext}`);
+        return ext ? validExtensions.includes(`.${ext}`) : false;
       });
 
       if (validFiles.length === 0) {
-        alert('Please upload a valid 3D model file (.stl, .step, .stp, .obj, .3ds, .fbx)');
+        console.log('No valid files selected');
         return;
       }
 
-      // Process each file (you can modify this part to upload to your server)
+      // Process each valid file
       for (const file of validFiles) {
-        console.log('Processing file:', file.name);
-        
-        // Example: Read file as ArrayBuffer
         const arrayBuffer = await file.arrayBuffer();
-        console.log('File size:', arrayBuffer.byteLength, 'bytes');
-        
-        // Here you would typically upload the file to your server
+        // Process the file (e.g., upload to server)
+        console.log('Processing file:', file.name);
         // Example: await uploadToServer(file, arrayBuffer);
       }
 
       // Show success message
       const fileNames = validFiles.map(file => file.name).join(', ');
-      alert(`Successfully processed ${validFiles.length} file(s): ${fileNames}`);
+      console.log(`Successfully processed ${validFiles.length} file(s): ${fileNames}`);
       
     } catch (error) {
       console.error('Error processing files:', error);
-      alert('An error occurred while processing the files. Please try again.');
-    } finally {
-      // Reset the input value to allow uploading the same file again
-      if (event.target) {
-        event.target.value = '';
-      }
     }
   };
 
@@ -157,29 +168,6 @@ export default function HeroSection() {
       controls.start('visible');
     }
   }, [controls, isInView]);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        ease: 'easeOut',
-      },
-    },
-  };
 
   return (
     <section className="relative w-full h-screen bg-gray-50 overflow-hidden pt-16 md:pt-0">
