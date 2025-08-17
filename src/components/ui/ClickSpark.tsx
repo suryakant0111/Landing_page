@@ -133,7 +133,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
     };
   }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
 
-    const handleClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>): void => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -153,9 +153,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
 
     return (
         <div
-          className="fixed inset-0 w-full h-full pointer-events-auto"
-          style={{ zIndex: 0 }}
-          onClick={handleClick}
+          className="absolute inset-0 w-full h-full -z-10"
         >
             <canvas
                 ref={canvasRef}
