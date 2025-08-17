@@ -1,5 +1,5 @@
-import React, { useState, useRef, ChangeEvent, DragEvent } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import type { ChangeEvent, DragEvent } from 'react';import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { ArrowRight, Upload, X, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 
