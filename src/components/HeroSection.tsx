@@ -37,7 +37,7 @@ function MotorModel() {
   // Smoother and slower spring animation
   const { scale, position, opacity } = useSpring({
     scale: active ? 4.0 : 0.8,
-    position: active ? [0, 0, 0] : [0, -2, 0],
+    position: active ? [0, 0, 0] : [0, 0, 0],
     opacity: active ? 1 : 0,
     config: { 
       mass: 2, 
