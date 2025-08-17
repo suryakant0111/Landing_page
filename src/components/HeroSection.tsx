@@ -144,10 +144,10 @@ export default function HeroSection() {
 
       // Process each valid file
       for (const file of validFiles) {
-        const _arrayBuffer = await file.arrayBuffer();
+        await file.arrayBuffer();
         // Process the file (e.g., upload to server)
         console.log('Processing file:', file.name);
-        // Example: await uploadToServer(file, _arrayBuffer);
+        // Example: await uploadToServer(file, await file.arrayBuffer());
       }
 
       // Show success message
