@@ -133,24 +133,6 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
     };
   }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>): void => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const now = performance.now();
-    const newSparks: Spark[] = Array.from({length: sparkCount}, (_, i) => ({
-      x,
-      y,
-      angle: (2 * Math.PI * i) / sparkCount,
-      startTime: now,
-    }));
-
-    sparksRef.current.push(...newSparks);
-  };
-
     return (
         <div
           className="absolute inset-0 w-full h-full -z-10"
