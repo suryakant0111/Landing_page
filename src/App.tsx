@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import type { Variants } from 'framer-motion';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLayoutEffect } from 'react';
 import Navbar from './components/Navbar';
@@ -22,25 +23,25 @@ function ScrollToTop() {
 }
 
 // Animation variants for page transitions
-const pageVariants = {
+const pageVariants: Variants = {
   initial: {
     opacity: 0,
     y: 20,
   },
-  in: {
+  enter: {
     opacity: 1,
     y: 0,
     transition: {
       duration: 0.5,
-      ease: [0.4, 0.0, 0.2, 1],
+      ease: [0.4, 0.0, 0.2, 1] as [number, number, number, number],
     },
   },
-  out: {
+  exit: {
     opacity: 0,
     y: -20,
     transition: {
       duration: 0.3,
-      ease: [0.4, 0.0, 0.2, 1],
+      ease: [0.4, 0.0, 0.2, 1] as [number, number, number, number],
     },
   },
 };
@@ -49,8 +50,8 @@ const pageVariants = {
 const PageTransition = ({ children }: { children: React.ReactNode }) => (
   <motion.div
     initial="initial"
-    animate="in"
-    exit="out"
+    animate="enter"
+    exit="exit"
     variants={pageVariants}
   >
     {children}
@@ -59,11 +60,11 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
 
 function App() {
   const location = useLocation();
-  
+
   return (
     <div className="relative min-h-screen">
       <ClickSpark
-        sparkColor='#000'
+        sparkColor="#000"
         sparkSize={10}
         sparkRadius={15}
         sparkCount={8}
