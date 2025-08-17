@@ -125,7 +125,7 @@ export default function AboutSection() {
               viewport={{ once: true, margin: "-20% 0px -20% 0px" }}
               className="space-y-0.5 mt-2"
             >
-              {items.map((it, idx) => (
+              {items.map((it, _idx) => (
                 <motion.li
                   key={it.number}
                   variants={itemVariants}

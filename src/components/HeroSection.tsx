@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, useAnimations } from "@react-three/drei";
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
@@ -144,10 +144,10 @@ export default function HeroSection() {
 
       // Process each valid file
       for (const file of validFiles) {
-        const arrayBuffer = await file.arrayBuffer();
+        const _arrayBuffer = await file.arrayBuffer();
         // Process the file (e.g., upload to server)
         console.log('Processing file:', file.name);
-        // Example: await uploadToServer(file, arrayBuffer);
+        // Example: await uploadToServer(file, _arrayBuffer);
       }
 
       // Show success message
